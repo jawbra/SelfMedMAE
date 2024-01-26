@@ -118,7 +118,7 @@ class MAE3DTrainer(BaseTrainer):
                         'state_dict': self.model.state_dict(),
                         'optimizer' : self.optimizer.state_dict(),
                         'scaler': self.scaler.state_dict(), # additional line compared with base imple
-                    }, is_best=False, filename=f'{args.output_dir}/{wandb.run.name}/checkpoint_{epoch:04d}.pth.tar')
+                    }, is_best=False, filename=f'{args.output_dir}{wandb.run.name}/checkpoint_{epoch:04d}.pth.tar')
                     print("=> finish saving checkpoint")
 
     def epoch_train(self, epoch, niters):
@@ -190,7 +190,7 @@ class MAE3DTrainer(BaseTrainer):
         model.eval()
 
 
-        iter_through_batch = [0,1,2]
+        iter_through_batch = [0,1,2,3,4,5,6,7,8]
 
 
         for idx, batch_data in enumerate(loader):
@@ -201,6 +201,8 @@ class MAE3DTrainer(BaseTrainer):
 
                 # compute output and loss
                 _, x, recon, masked_x = model(image, return_image=True)
+
+                #idx=15
 
                 vis_tensor = torch.cat([x, masked_x, recon], dim=0)
 

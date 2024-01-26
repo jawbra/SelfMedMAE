@@ -62,7 +62,7 @@ def main_worker(gpu, args):
                         config=vars(args),
                         id=args.wandb_id,
                         resume='allow',
-                        dir=args.output_dir)
+                        dir=args.wandb_dir)
 
     # create model
     trainer.build_model()

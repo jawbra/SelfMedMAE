@@ -10,16 +10,17 @@ wandb_id:
 
 # dataset
 dataset: btcv
-json_list: 'data.json'
+json_list: 'data_debugging.json'
 data_path: /home/brandtj/Data/brandtj/appendix_data/Task66_aippendix_rodeo/raw_splitted/imagesTr/
 
 # output
+wandb_dir: /home/brandtj/Data/brandtj/aippendix/SelfMedMAE/runs/wandb
 output_dir: /home/brandtj/Data/brandtj/aippendix/SelfMedMAE/runs/
-ckpt_dir: ${output_dir}/ckpts
+ckpt_dir: ckpts
 
 # data preprocessing
-space_x: 1.5
-space_y: 1.5
+space_x: 1.0
+space_y: 1.0
 space_z: 2.0
 a_min: -175.0
 a_max: 250.0
@@ -35,8 +36,8 @@ RandShiftIntensityd_prob: 0.1
 
 # trainer
 trainer_name: MAE3DTrainer
-batch_size: 16
-vis_batch_size: 2
+batch_size: 8
+vis_batch_size: 16
 start_epoch: 0
 warmup_epochs: 100
 epochs: 1000

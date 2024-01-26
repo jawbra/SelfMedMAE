@@ -236,6 +236,7 @@ class BaseTrainer(object):
             print("=> no checkpoint found at '{}'".format(args.resume))
 
     def save_checkpoint(self, state, is_best, filename='checkpoint.pth.tar'):
+        os.makedirs(filename.rsplit('/', 1)[0], exist_ok=True)
         torch.save(state, filename)
         if is_best:
             shutil.copyfile(filename, 'model_best.pth.tar')
