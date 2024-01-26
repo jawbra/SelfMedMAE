@@ -5,7 +5,7 @@ from functools import partial
 from matplotlib.pyplot import grid
 import numpy as np
 from numpy import nanmean, nonzero, percentile
-from torchprofile import profile_macs
+#from torchprofile import profile_macs
 
 import torch
 import torchvision

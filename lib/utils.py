@@ -73,8 +73,8 @@ def get_conf():
     args = parser.parse_args()
     if args.gpu:
         args.gpu = int(args.gpu)
-    args.output_dir = '/'.join([*(args.output_dir.split('/')[:-1]), args.run_name])
-    args.ckpt_dir = f"{args.output_dir}/ckpts"
+    #args.output_dir = '/'.join([*(args.output_dir.split('/')[:-1]), args.run_name])
+    #args.ckpt_dir = f"{args.output_dir}/ckpts"
     if not hasattr(args, 'num_samples'):
         args.num_samples = 4
     print(args)

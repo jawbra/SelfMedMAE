@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+
+#experiments
+.vscode/
+runs/
+data_added_by_me/
+venv.yaml
+
 # Distribution / packaging
 .Python
 build/

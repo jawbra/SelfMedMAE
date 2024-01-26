@@ -118,7 +118,7 @@ class MAE3DTrainer(BaseTrainer):
                         'state_dict': self.model.state_dict(),
                         'optimizer' : self.optimizer.state_dict(),
                         'scaler': self.scaler.state_dict(), # additional line compared with base imple
-                    }, is_best=False, filename=f'{args.ckpt_dir}/checkpoint_{epoch:04d}.pth.tar')
+                    }, is_best=False, filename=f'{args.output_dir}/{wandb.run.name}/checkpoint_{epoch:04d}.pth.tar')
                     print("=> finish saving checkpoint")
 
     def epoch_train(self, epoch, niters):
@@ -173,6 +173,7 @@ class MAE3DTrainer(BaseTrainer):
                         {
                         "lr": optimizer.param_groups[0]['lr'],
                         "Loss": loss.item(),
+                        "epoch": epoch,
                         },
                         step=niters,
                     )
@@ -188,41 +189,47 @@ class MAE3DTrainer(BaseTrainer):
 
         model.eval()
 
-        for batch_data in loader:
-            image = batch_data['image']
-            if args.gpu is not None:
-                image = image.cuda(args.gpu, non_blocking=True)
 
-            # compute output and loss
-            _, x, recon, masked_x = model(image, return_image=True)
+        iter_through_batch = [0,1,2]
 
-            vis_tensor = torch.cat([x, masked_x, recon], dim=0)
 
-            # visualize
-            grid_size = []
-            for pa_size, in_size in zip(to_3tuple(args.patch_size), to_3tuple(args.input_size)):
-                grid_size.append(in_size // pa_size)
-            vis_grid_hw = patches3d_to_grid(vis_tensor, patch_size=args.patch_size, grid_size=grid_size, in_chans=args.in_chans, hidden_axis='d')
-            # import pdb
-            # pdb.set_trace()
-            # vis_grid_hd = patches3d_to_grid(vis_tensor, patch_size=args.patch_size, grid_size=grid_size, in_chans=args.in_chans, hidden_axis='w')
-            # vis_grid_wd = patches3d_to_grid(vis_tensor, patch_size=args.patch_size, grid_size=grid_size, in_chans=args.in_chans, hidden_axis='h')
+        for idx, batch_data in enumerate(loader):
+            if idx in iter_through_batch:
+                image = batch_data['image']
+                if args.gpu is not None:
+                    image = image.cuda(args.gpu, non_blocking=True)
 
-            print("wandb logging")
-            vis_grid_hw = wandb.Image(vis_grid_hw, caption=f"hw_iter{niters:06d}")
-            # vis_grid_hd = wandb.Image(vis_grid_hd, caption=f"hd_iter{niters:06d}")
-            # vis_grid_wd = wandb.Image(vis_grid_wd, caption=f"wd_iter{niters:06d}")
+                # compute output and loss
+                _, x, recon, masked_x = model(image, return_image=True)
 
-            wandb.log(
-                {
-                "vis_hw": vis_grid_hw,
-                # "vis_hd": vis_grid_hd,
-                # "vis_wd": vis_grid_wd
-                },
-                step=niters,
-            )
-            break
-        print("finish wandb logging")
+                vis_tensor = torch.cat([x, masked_x, recon], dim=0)
+
+                # visualize
+                grid_size = []
+                for pa_size, in_size in zip(to_3tuple(args.patch_size), to_3tuple(args.input_size)):
+                    grid_size.append(in_size // pa_size)
+                vis_grid_hw = patches3d_to_grid(vis_tensor, patch_size=args.patch_size, grid_size=grid_size, in_chans=args.in_chans, hidden_axis='d')
+                # import pdb
+                # pdb.set_trace()
+                #vis_grid_hd = patches3d_to_grid(vis_tensor, patch_size=args.patch_size, grid_size=grid_size, in_chans=args.in_chans, hidden_axis='w')
+                #vis_grid_wd = patches3d_to_grid(vis_tensor, patch_size=args.patch_size, grid_size=grid_size, in_chans=args.in_chans, hidden_axis='h')
+
+                print("wandb logging")
+                vis_grid_hw = wandb.Image(vis_grid_hw, caption=f"hw_iter{niters:06d}")
+                #vis_grid_hd = wandb.Image(vis_grid_hd, caption=f"hd_iter{niters:06d}")
+                #vis_grid_wd = wandb.Image(vis_grid_wd, caption=f"wd_iter{niters:06d}")
+
+                wandb.log(
+                    {
+                    f"vis_hw_batch_{idx}": vis_grid_hw,
+                    #"vis_hd": vis_grid_hd,
+                    #"vis_wd": vis_grid_wd
+                    },
+                    step=niters,
+                )
+                if idx == 2:
+                    break
+            print("finish wandb logging")
 
 
     def resume(self):

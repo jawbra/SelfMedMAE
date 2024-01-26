@@ -58,7 +58,7 @@ def main_worker(gpu, args):
             args.wandb_id = wandb.util.generate_id()
 
         run = wandb.init(project=f"{args.proj_name}_{args.dataset}", 
-                        name=args.run_name, 
+                        name=None, 
                         config=vars(args),
                         id=args.wandb_id,
                         resume='allow',
