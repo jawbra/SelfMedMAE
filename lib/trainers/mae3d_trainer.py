@@ -190,7 +190,7 @@ class MAE3DTrainer(BaseTrainer):
         model.eval()
 
 
-        iter_through_batch = [0,1,2,3,4,5,6,7,8]
+        iter_through_batch = [15,20,24,26]
 
 
         for idx, batch_data in enumerate(loader):
