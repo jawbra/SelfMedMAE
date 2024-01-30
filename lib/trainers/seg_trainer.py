@@ -31,6 +31,7 @@ from timm.utils import accuracy
 from timm.models.layers.helpers import to_3tuple
 
 from monai.losses import DiceCELoss, DiceLoss
+from torch.nn import BCELoss
 from monai.inferers import sliding_window_inference
 from monai.data import decollate_batch
 from monai.transforms import AsDiscrete
@@ -81,11 +82,7 @@ class SegTrainer(BaseTrainer):
 
             if args.dataset == 'btcv':
                 args.num_classes = 14
-                self.loss_fn = DiceCELoss(to_onehot_y=True,
-                                          softmax=True,
-                                          squared_pred=True,
-                                          smooth_nr=args.smooth_nr,
-                                          smooth_dr=args.smooth_dr)
+                self.loss_fn = BCELoss()
             elif args.dataset == 'msd_brats':
                 args.num_classes = 3
                 self.loss_fn = DiceLoss(to_onehot_y=False, 
@@ -104,7 +101,9 @@ class SegTrainer(BaseTrainer):
                 self.mixup_fn = None
 
             self.model = getattr(models, self.model_name)(encoder=getattr(networks, args.enc_arch),
-                                                          decoder=getattr(networks, args.dec_arch),
+                                                          #decoder=getattr(networks, args.dec_arch),
+                                                          #TODO: add classifier to configs
+                                                          classifier=getattr(networks, args.classifier),
                                                           args=args)
 
             # load pretrained weights
@@ -306,6 +305,7 @@ class SegTrainer(BaseTrainer):
 
             image = batch_data['image']
             target = batch_data['label']
+            #label needs to be a number, not a segmentation mask
 
             # print(image.shape)
 

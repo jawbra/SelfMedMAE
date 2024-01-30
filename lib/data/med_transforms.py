@@ -81,6 +81,56 @@ def get_scratch_train_transforms(args):
                 transforms.ToTensord(keys=["image", "label"]),
             ]
         )
+    if args.dataset == 'appendix':
+        train_transform = transforms.Compose(
+            [
+                transforms.LoadImaged(keys=["image"]),
+                transforms.AddChanneld(keys=["image"]),
+                transforms.Orientationd(keys=["image"], axcodes="RAS"),
+                transforms.Spacingd(keys=["image"],
+                                    pixdim=(args.space_x, args.space_y, args.space_z),
+                                    mode=("bilinear", "nearest")),
+                transforms.ScaleIntensityRanged(keys=["image"],
+                                                a_min=args.a_min,
+                                                a_max=args.a_max,
+                                                b_min=args.b_min,
+                                                b_max=args.b_max,
+                                                clip=True),
+                transforms.CropForegroundd(keys=["image"], source_key="image"),
+                transforms.RandCropByPosNegLabeld(
+                    keys=["image"],
+                    label_key="label",
+                    spatial_size=(args.roi_x, args.roi_y, args.roi_z),
+                    pos=1,
+                    neg=1,
+                    num_samples=args.num_samples,
+                    image_key="image",
+                    image_threshold=0,
+                ),
+                transforms.SpatialCropd(keys=["image"], roi_center=(64,64,64), roi_size=(64,64,32)),
+                transforms.RandFlipd(keys=["image"],
+                                    prob=args.RandFlipd_prob,
+                                    spatial_axis=0),
+                transforms.RandFlipd(keys=["image"],
+                                    prob=args.RandFlipd_prob,
+                                    spatial_axis=1),
+                transforms.RandFlipd(keys=["image"],
+                                    prob=args.RandFlipd_prob,
+                                    spatial_axis=2),
+                transforms.RandRotate90d(
+                    keys=["image"],
+                    prob=args.RandRotate90d_prob,
+                    max_k=3,
+                ),
+                transforms.RandScaleIntensityd(keys="image",
+                                            factors=0.1,
+                                            prob=args.RandScaleIntensityd_prob),
+                transforms.RandShiftIntensityd(keys="image",
+                                            offsets=0.1,
+                                            prob=args.RandShiftIntensityd_prob),
+                transforms.ToTensord(keys=["image", "label"]),
+            ]
+        )
     elif args.dataset == 'msd_brats':
         train_transform = transforms.Compose(
             [

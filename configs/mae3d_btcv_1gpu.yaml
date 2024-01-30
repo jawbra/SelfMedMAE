@@ -26,9 +26,9 @@ a_min: -175.0
 a_max: 250.0
 b_min: 0.0
 b_max: 1.0
-roi_x: 96
-roi_y: 96
-roi_z: 96
+roi_x: 72
+roi_y: 72
+roi_z: 48
 RandFlipd_prob: 0.2
 RandRotate90d_prob: 0.2
 RandScaleIntensityd_prob: 0.1
@@ -40,7 +40,7 @@ batch_size: 12
 vis_batch_size: 2
 start_epoch: 0
 warmup_epochs: 100
-epochs: 1500
+epochs: 750
 workers: 24
 resume:
 
@@ -60,7 +60,7 @@ decoder_num_heads: 12
 
 # optimizer
 type: adamw
-lr: 6.4e-2
+lr: 8.4e-2
 beta1: 0.9
 beta2: 0.95
 weight_decay: 0.05
