@@ -9,18 +9,18 @@ run_name: ${proj_name}_${arch}_${dataset}
 wandb_id:
 disable_wandb: 0
 
-# dataset
 dataset: btcv
-json_list: 'transunet.json'
-data_path: /nvme/zhoulei/BTCV
+json_list: 'dataset_fold2.json'
+data_path: /home/brandtj/Data/brandtj/appendix_data/Task66_aippendix_rodeo/raw_splitted/imagesTr/
 
 # output
-output_dir: /nvme/zhoulei/ssl-framework/${run_name}
-ckpt_dir: ${output_dir}/ckpts
+wandb_dir: /home/brandtj/Data/brandtj/aippendix/SelfMedMAE/runs/wandb
+output_dir: /home/brandtj/Data/brandtj/aippendix/SelfMedMAE/runs_classifier/
+ckpt_dir: ckpts
 
 # data preprocessing
-space_x: 1.5
-space_y: 1.5
+space_x: 1.0
+space_y: 1.0
 space_z: 2.0
 a_min: -175.0
 a_max: 250.0
@@ -45,7 +45,7 @@ start_epoch: 0
 warmup_epochs: 50
 epochs: 5000
 workers: 8
-pretrain:
+pretrain: /home/brandtj/Data/brandtj/aippendix/SelfMedMAE/runs/balmy-dragon-56/checkpoint_1499.pth.tar
 resume:
 
 # drop
@@ -67,6 +67,8 @@ encoder_embed_dim: 768
 encoder_depth: 12
 encoder_num_heads: 12
 # decoder_embed_dim: 384
+emb_size: 384
+n_classes: 2
 # decoder_depth: 8
 # decoder_num_heads: 12
 

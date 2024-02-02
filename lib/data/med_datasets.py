@@ -92,7 +92,7 @@ def get_json_trainset(args, workers, train_transform=None):
         data=datalist,
         transform=train_transform,
         cache_num=len(datalist),
-        cache_rate=1.0,
+        cache_rate=0.1,
         num_workers=workers,
     )
     return train_ds

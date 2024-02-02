@@ -8,6 +8,7 @@ from numpy import nanmean, nonzero, percentile
 #from torchprofile import profile_macs
 
 import torch
+from torch import nn
 import torchvision
 import torchvision.transforms as transforms
 import torch.nn.functional as F
@@ -31,15 +32,37 @@ from timm.utils import accuracy
 from timm.models.layers.helpers import to_3tuple
 
 from monai.losses import DiceCELoss, DiceLoss
-from torch.nn import BCELoss
+from torch.nn import BCELoss, BCEWithLogitsLoss
 from monai.inferers import sliding_window_inference
 from monai.data import decollate_batch
 from monai.transforms import AsDiscrete
-from monai.metrics import compute_meandice, compute_hausdorff_distance
+from monai.metrics import compute_meandice, compute_hausdorff_distance, ConfusionMatrixMetric
 
 from collections import defaultdict, OrderedDict
 
 import pdb
+
+
+##classifier from M3T implementation
+
+class ClassificationHead(nn.Module):
+    '''
+    A linear classifier is used to classify the encoded input based on the MLP 
+    head: ZKcls ∈ R(d). There are two final categorization classes: NC and AD.
+    The first token (cls_token) from the sequence is used for classification.
+    '''
+    def __init__(self, emb_size: int = 384, n_classes: int = 2):
+        super().__init__()
+        self.linear = nn.Linear(emb_size, n_classes)
+
+    def forward(self, x):
+        # As x is of shape [batch_size, num_tokens, emb_size]
+        # and the cls_token is the first token in the sequence
+        cls_token = x[:, 0]
+        return self.linear(cls_token)
+    
+######################################
+
 
 def compute_avg_metric(metric, meters, metric_name, batch_size, args):
     assert len(metric.shape) == 2
@@ -70,9 +93,10 @@ class SegTrainer(BaseTrainer):
                                           partial(compute_hausdorff_distance, percentile=95))
                                         ])
         else:
+            get_cfm = ConfusionMatrixMetric()
             self.metric_funcs = OrderedDict([
-                                        ('Dice', 
-                                          compute_meandice)
+                                        ('cfm', 
+                                          get_cfm)
                                         ])
 
     def build_model(self):
@@ -81,8 +105,9 @@ class SegTrainer(BaseTrainer):
             print(f"=> creating model {self.model_name}")
 
             if args.dataset == 'btcv':
-                args.num_classes = 14
-                self.loss_fn = BCELoss()
+                #args.num_classes = 14
+                args.num_classes = 2
+                self.loss_fn = BCEWithLogitsLoss()
             elif args.dataset == 'msd_brats':
                 args.num_classes = 3
                 self.loss_fn = DiceLoss(to_onehot_y=False, 
@@ -100,11 +125,18 @@ class SegTrainer(BaseTrainer):
             else:
                 self.mixup_fn = None
 
-            self.model = getattr(models, self.model_name)(encoder=getattr(networks, args.enc_arch),
-                                                          #decoder=getattr(networks, args.dec_arch),
+            self.encoder = getattr(models, self.model_name)(encoder=getattr(networks, args.enc_arch),
+                                                          decoder=getattr(networks, args.dec_arch),
                                                           #TODO: add classifier to configs
-                                                          classifier=getattr(networks, args.classifier),
+                                                          #classifier=getattr(networks, args.classifier),
                                                           args=args)
+            self.classifier=ClassificationHead(emb_size=args.emb_size, n_classes=args.n_classes)
+
+            self.model = nn.Sequential(
+                self.encoder,
+                self.classifier
+            )
+                                                        
 
             # load pretrained weights
             if hasattr(args, 'test') and args.test and args.pretrain is not None and os.path.exists(args.pretrain):

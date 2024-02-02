@@ -28,7 +28,7 @@ b_min: 0.0
 b_max: 1.0
 roi_x: 72
 roi_y: 72
-roi_z: 48
+roi_z: 72
 RandFlipd_prob: 0.2
 RandRotate90d_prob: 0.2
 RandScaleIntensityd_prob: 0.1
